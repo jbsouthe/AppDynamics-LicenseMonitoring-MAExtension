@@ -1,0 +1,2 @@
+machine agent jar is installed in maven locally with:
+mvn install:install-file -Dfile=machineagent.jar -DgroupId=com.appdynamics -DartifactId=machineagent -Dversion=21.9 -Dpackaging=jar -DgeneratePom=true
