@@ -98,7 +98,7 @@ public class Controller {
         for( LicenseRule rule : rules ) {
             LicenseAllocation licenseAllocation = gson.fromJson(
                     getRequest("controller/licensing/v1/usage/account/%s/allocation/%s?dateFrom=%s&dateTo=%s&granularityMinutes=%d&includeEntityTypes=true",
-                            getAccountId(), rule.licenseKey, Util.getDateString(-10), Util.getDateString(0), 1
+                            getAccountId(), rule.licenseKey, Util.getEncodedDateString(-10), Util.getEncodedDateString(0), 5 //must be divisible by 5!!
                     ), LicenseAllocation.class);
             if( licenseAllocation != null && licenseAllocation.packages != null ) rule.packages = licenseAllocation.packages;
             if( rule.filters != null )
@@ -214,10 +214,6 @@ public class Controller {
             logger.error("Exception in attempting to get controller data, Exception: %s",e.getMessage());
             return null;
         }
-        if( response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            logger.warn("request %s returned bad status: %s", request, response.getStatusLine());
-            return null;
-        }
         HttpEntity entity = response.getEntity();
         Header encodingHeader = entity.getContentEncoding();
         Charset encoding = encodingHeader == null ? StandardCharsets.UTF_8 : Charsets.toCharset(encodingHeader.getValue());
@@ -225,6 +221,10 @@ public class Controller {
         try {
             json = EntityUtils.toString(entity, StandardCharsets.UTF_8);
             logger.trace("JSON returned: %s",json);
+            if( response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                logger.warn("request %s returned bad status: %s message: %s", request, response.getStatusLine(), json);
+                return null;
+            }
         } catch (IOException e) {
             logger.warn("IOException parsing returned encoded string to json text: "+ e.getMessage());
             return null;
@@ -243,14 +243,12 @@ public class Controller {
 
             for( LicenseRule licenseRule : controller.getAllLicenseAllocations() ) {
                 //(licenseRule.getTotalLimits() == 0 ? 0 : licenseRule.usedLicenses /  licenseRule.getTotalLimits() * 100)
-                logger.info("Rule %s Total Allocations: %d Used: %d Available: %d",licenseRule.name, licenseRule.getTotalLimits(), licenseRule.usedLicenses, licenseRule.getTotalLimits() - licenseRule.usedLicenses );
+                logger.info("Rule %s Total Provisioned: %d Used: %d Available: %d",licenseRule.name, licenseRule.getProvisionedLicenses(), licenseRule.getUsedLicenses(), licenseRule.getProvisionedLicenses() - licenseRule.getUsedLicenses() );
             }
-            /*
             for( LicenseModule licenseModule : controller.getLicenseModules() ) {
                 logger.info("License Module: %s number of provisioned licenses: %s", licenseModule.name, licenseModule.properties.get("number-of-provisioned-licenses"));
             }
 
-             */
 
         } catch (MalformedURLException e) {
             e.printStackTrace();

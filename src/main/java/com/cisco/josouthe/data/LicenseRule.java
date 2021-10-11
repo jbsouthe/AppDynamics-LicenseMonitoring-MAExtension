@@ -37,7 +37,6 @@ public class LicenseRule {
     public boolean disabled;
     public Limit[] limits;
     public Filter[] filters;
-    public transient long usedLicenses=0;
     public List<Application> applications = new ArrayList<>();
     public LicensePackage[] packages;
 
@@ -45,5 +44,24 @@ public class LicenseRule {
         int total=0;
         for( Limit limit : limits ) total+=limit.units;
         return total;
+    }
+
+    public long getUsedLicenses() {
+        long count=0;
+        for( LicensePackage licensePackage : packages ) {
+            for( LicenseUnitUsages licenseUnitUsages : licensePackage.unitUsages ) {
+                count += licenseUnitUsages.data[0].used.avg;
+            }
+        }
+        return count;
+    }
+    public long getProvisionedLicenses() {
+        long count=0;
+        for( LicensePackage licensePackage : packages ) {
+            for( LicenseUnitUsages licenseUnitUsages : licensePackage.unitUsages ) {
+                count += licenseUnitUsages.data[0].provisioned.avg;
+            }
+        }
+        return count;
     }
 }
