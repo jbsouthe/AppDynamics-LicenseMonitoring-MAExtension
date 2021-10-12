@@ -16,7 +16,7 @@ import java.util.Map;
 public class LicenseMonitor extends AManagedMonitor {
     private static final Logger logger = LogManager.getFormatterLogger();
     private Controller controller =null;
-    private String metricPrefix = "Custom Metrics|License Monitor";
+    private String metricPrefix = "Custom Metrics|License Monitor|";
 
     @Override
     public TaskOutput execute(Map<String, String> configMap, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
@@ -28,6 +28,7 @@ public class LicenseMonitor extends AManagedMonitor {
         } catch (MalformedURLException exception) {
             throw new TaskExecutionException(String.format("License Monitor configuration could not accept controllerURL: %s Exception: %s", configMap.get("controllerURL"), exception.getMessage()));
         }
+        controller.getAccountId();
 
         printMetric("up", 1,
                 MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,
@@ -41,20 +42,22 @@ public class LicenseMonitor extends AManagedMonitor {
                     MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,
                     MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_COLLECTIVE
             );
-            for(HostObject hostContainer : application.licenseUsage.hosts ) {
-                for(HostItemObject host : hostContainer.items ) {
-                    String baseName="Applications|"+ application.name + "|" + host.host + "|";
-                    printMetric(baseName+"vCpu", host.vCpu,
-                            MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,
-                            MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,
-                            MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_COLLECTIVE
-                    );
-                    printMetric(baseName+"nodeCount", host.nodes.length,
-                            MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,
-                            MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,
-                            MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_COLLECTIVE
-                    );
-                }
+            if( application.licenseUsage != null && application.licenseUsage.hosts != null )
+                for(HostObject hostContainer : application.licenseUsage.hosts ) {
+                    if( hostContainer == null ) continue;
+                    for(HostItemObject host : hostContainer.items ) {
+                        String baseName="Applications|"+ application.name + "|" + host.host + "|";
+                        printMetric(baseName+"vCpu", host.vCpu,
+                                MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,
+                                MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,
+                                MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_COLLECTIVE
+                        );
+                        printMetric(baseName+"nodeCount", host.nodes.length,
+                                MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,
+                                MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,
+                                MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_COLLECTIVE
+                        );
+                    }
             }
         }
 
@@ -72,11 +75,13 @@ public class LicenseMonitor extends AManagedMonitor {
                     MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,
                     MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_COLLECTIVE
             );
+            /*
             printMetric(baseName+"inUsePercentage", licenseRule.getUsedPercentageLicenses(),
                     MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,
                     MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,
                     MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_COLLECTIVE
             );
+             */
             printMetric(baseName+"freeCount", licenseRule.getFreeLicenses(),
                     MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION,
                     MetricWriter.METRIC_TIME_ROLLUP_TYPE_CURRENT,
