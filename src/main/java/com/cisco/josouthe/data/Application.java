@@ -26,6 +26,7 @@ package com.cisco.josouthe.data;
  */
 public class Application {
     public String name, description, id;
+    public LicenseUsage licenseUsage;
     public Node[] nodes;
     public int vCpuTotal;
     public int getNodeCount() {

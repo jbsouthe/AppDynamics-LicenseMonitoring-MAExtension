@@ -64,4 +64,14 @@ public class LicenseRule {
         }
         return count;
     }
+
+    public long getFreeLicenses() {
+        return getProvisionedLicenses() - getUsedLicenses();
+    }
+
+    public double getUsedPercentageLicenses() {
+        long total = getProvisionedLicenses();
+        if( total == 0 ) return 0.0;
+        return (double)getUsedLicenses() / (double)getProvisionedLicenses() * 100;
+    }
 }

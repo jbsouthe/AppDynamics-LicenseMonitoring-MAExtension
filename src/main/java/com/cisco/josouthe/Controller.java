@@ -63,21 +63,19 @@ public class Controller {
     }
 
     public Application[] getApplications() {
-        if( this.applications == null ) {
-            getAccountId();
-            ApplicationAndLinks applicationAndLinks = gson.fromJson(getRawRequest(links.get("applications")), ApplicationAndLinks.class);
-            this.applications = applicationAndLinks.applications;
-            for( Application application : this.applications ) {
-                application.nodes = gson.fromJson(getRequest("controller/api/accounts/%s/applications/%s/nodes", getAccountId(), application.id), Nodes.class).nodes;
-                application.vCpuTotal = gson.fromJson(getRequest("controller/licensing/v1/account/%s/grouped-usage/application/by-id?appId=%s&includeAgents=false", getAccountId(), application.id), LicenseUsage.class).vCpuTotal;
-                /* no value
-                if( application.nodes != null )
-                    for( Node node : application.nodes ) {
-                        getRequest("controller/api/accounts/%s/applications/%s/nodes/%s", getAccountId(), application.id, node.id);
-                    }
+        getAccountId();
+        ApplicationAndLinks applicationAndLinks = gson.fromJson(getRawRequest(links.get("applications")), ApplicationAndLinks.class);
+        this.applications = applicationAndLinks.applications;
+        for( Application application : this.applications ) {
+            application.nodes = gson.fromJson(getRequest("controller/api/accounts/%s/applications/%s/nodes", getAccountId(), application.id), Nodes.class).nodes;
+            application.licenseUsage = gson.fromJson(getRequest("controller/licensing/v1/account/%s/grouped-usage/application/by-id?appId=%s&includeAgents=true", getAccountId(), application.id), LicenseUsage.class);
+            /* no value
+            if( application.nodes != null )
+                for( Node node : application.nodes ) {
+                    getRequest("controller/api/accounts/%s/applications/%s/nodes/%s", getAccountId(), application.id, node.id);
+                }
 
-                 */
-            }
+             */
         }
         return applications;
     }
@@ -256,15 +254,18 @@ public class Controller {
             Controller controller = new Controller(new URL("https://svbtest.saas.appdynamics.com/"), "LicenseMonitor@svbtest", "dabb1982-d550-41ab-bf3c-0860cb213b51");
             logger.info("Account ID: %s",controller.getAccountId());
             for (Application app : controller.getApplications() ) {
-                logger.info("Application: %s id: %s node count: %d license usage: %d", app.name, app.id, app.getNodeCount(), app.vCpuTotal);
+                logger.info("Application: %s id: %s node count: %d license usage: %d", app.name, app.id, app.getNodeCount(), app.licenseUsage.vCpuTotal);
             }
 
             for( LicenseRule licenseRule : controller.getAllLicenseAllocations() ) {
                 //(licenseRule.getTotalLimits() == 0 ? 0 : licenseRule.usedLicenses /  licenseRule.getTotalLimits() * 100)
-                logger.info("Rule %s Total Provisioned: %d Used: %d Available: %d",licenseRule.name, licenseRule.getProvisionedLicenses(), licenseRule.getUsedLicenses(), licenseRule.getProvisionedLicenses() - licenseRule.getUsedLicenses() );
+                logger.info("Rule %s Total Provisioned: %d Used: %d Available: %d Used Percentage: %f",licenseRule.name, licenseRule.getProvisionedLicenses(), licenseRule.getUsedLicenses(), licenseRule.getFreeLicenses(), licenseRule.getUsedPercentageLicenses() );
             }
             for( LicenseModule licenseModule : controller.getLicenseModules() ) {
-                logger.info("License Module: %s number of provisioned licenses: %s", licenseModule.name, licenseModule.properties.get("number-of-provisioned-licenses"));
+                String provisionedCount = licenseModule.properties.get("number-of-provisioned-licenses");
+                if( provisionedCount != null ) {
+                    logger.info("License Module: %s number of provisioned licenses: %s used: %d", licenseModule.name, licenseModule.properties.get("number-of-provisioned-licenses"), (licenseModule.usages.hosts != null ? licenseModule.usages.hosts.length : 0));
+                }
             }
 
 
