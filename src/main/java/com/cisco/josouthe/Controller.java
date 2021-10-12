@@ -87,7 +87,7 @@ public class Controller {
         for( LicenseModule module : modules ) {
             module.usages = gson.fromJson( getRawRequest( module.getLink("usages")), LicenseUsage.class);
             if( module.usages == null ) module.usages = new LicenseUsage();
-            module.properties = gson.fromJson( getRawRequest( module.getLink("properties")), Properties.class);
+            module.properties = gson.fromJson( getRawRequest( true, module.getLink("properties")), Properties.class);
             if( module.properties == null ) module.properties = new Properties();
         }
         return modules;
@@ -192,15 +192,28 @@ public class Controller {
     }
 
     private String getRequest( String formatOrURI, Object... args ) {
-        if( args == null || args.length == 0 ) return getRequest(formatOrURI);
-        return getRequest( String.format(formatOrURI,args));
+        if( args == null || args.length == 0 ) return getRequest(false, formatOrURI);
+        return getRequest( false, String.format(formatOrURI,args));
+    }
+
+    private String getRequest( boolean hideErrorResults, String formatOrURI, Object... args ) {
+        if( args == null || args.length == 0 ) return getRequest(hideErrorResults, formatOrURI);
+        return getRequest( hideErrorResults, String.format(formatOrURI,args));
     }
 
     private String getRequest( String uri ) {
-        return getRawRequest(String.format("%s%s", this.url.toString(), uri));
+        return getRawRequest(false, String.format("%s%s", this.url.toString(), uri));
     }
 
-    private String getRawRequest( String url ) {
+    private String getRequest( boolean hideErrorResults, String uri ) {
+        return getRawRequest( hideErrorResults, String.format("%s%s", this.url.toString(), uri));
+    }
+
+    private String getRawRequest(String url ) {
+        return getRawRequest(false, url);
+    }
+
+    private String getRawRequest(boolean hideErrorResults,  String url ) {
         HttpGet request = new HttpGet(url);
         request.addHeader(HttpHeaders.AUTHORIZATION, getBearerToken());
         logger.debug("HTTP Method: %s",request);
@@ -222,8 +235,13 @@ public class Controller {
             json = EntityUtils.toString(entity, StandardCharsets.UTF_8);
             logger.trace("JSON returned: %s",json);
             if( response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                logger.warn("request %s returned bad status: %s message: %s", request, response.getStatusLine(), json);
-                return null;
+                if( hideErrorResults ) {
+                    logger.debug("request %s returned bad status: %s message: %s", request, response.getStatusLine(), json);
+                    json="";
+                } else {
+                    logger.warn("request %s returned bad status: %s message: %s", request, response.getStatusLine(), json);
+                    return null;
+                }
             }
         } catch (IOException e) {
             logger.warn("IOException parsing returned encoded string to json text: "+ e.getMessage());
