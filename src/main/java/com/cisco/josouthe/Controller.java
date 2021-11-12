@@ -251,7 +251,7 @@ public class Controller {
     public static void main( String ... args ) {
         try {
             logger.info(Util.getDateString(-1));
-            Controller controller = new Controller(new URL("https://svbtest.saas.appdynamics.com/"), "LicenseMonitor@svbtest", "dabb1982-d550-41ab-bf3c-0860cb213b51");
+            Controller controller = new Controller(new URL("https://southerland-test.saas.appdynamics.com/"), "LicenseMonitor@southerland-test", "dabb1982-d550-41ab-bf3c-0860cb213b51");
             logger.info("Account ID: %s",controller.getAccountId());
             for (Application app : controller.getApplications() ) {
                 logger.info("Application: %s id: %s node count: %d license usage: %d", app.name, app.id, app.getNodeCount(), app.licenseUsage.vCpuTotal);
