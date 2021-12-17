@@ -10,10 +10,12 @@
             <directory>.</directory>
             <outputDirectory>LicenseMonitor</outputDirectory>
             <includes>
-                <include>LicenseMonitorExtension.jar</include>
                 <include>README*</include>
+                <include>Changelog.md</include>
+                <include>LICENSE</include>
+                <include>NOTICE.txt</include>
                 <include>log4j2.xml</include>
-                <include>monitor.xml</include>
+                <include>monitor-EXAMPLE.xml</include>
             </includes>
             <lineEnding>unix</lineEnding>
             <fileMode>0644</fileMode>
@@ -29,4 +31,11 @@
             </includes>
         </fileSet>
     </fileSets>
+    <files>
+        <file>
+            <source>LicenseMonitorExtension-${pom.version}.jar</source>
+            <outputDirectory>LicenseMonitor</outputDirectory>
+            <destName>LicenseMonitorExtension.jar</destName>
+        </file>
+    </files>
 </assembly>

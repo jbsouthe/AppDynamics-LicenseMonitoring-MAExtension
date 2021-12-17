@@ -24,12 +24,12 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.14.1</version>
+            <version>2.16.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.14.1</version>
+            <version>2.16.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.8</version>
+            <version>2.8.9</version>
         </dependency>
 
 
@@ -150,24 +150,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.coderplus.maven.plugins</groupId>
-                <artifactId>copy-rename-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-file</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <sourceFile>LicenseMonitorExtension-${pom.version}.jar</sourceFile>
-                            <destinationFile>LicenseMonitorExtension.jar</destinationFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
@@ -185,16 +167,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <!-- TODO if we can figure out how to list classes in a directory
-    <archive>
-        <manifestSections>
-          <manifestSection>
-              <name>Plugin-Classes</name>
-              <manifestEntries>
-              </manifestEntries>
-          </manifestSection>
-        </manifestSections>
-    </archive>
-    -->
 </project>
